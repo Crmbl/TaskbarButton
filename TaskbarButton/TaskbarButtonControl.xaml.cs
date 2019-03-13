@@ -1,85 +1,42 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Windows.Controls;
 using CSDeskBand;
-using CSDeskBand.ContextMenu;
 
 namespace TaskbarButton
 {
     [ComVisible(true)]
-    [Guid("89BF6B36-A0B0-4C95-A666-87A55C226986")]
-    [CSDeskBandRegistration(Name = "Auto hide taskbar", ShowDeskBand = true)]
-    [SuppressMessage("ReSharper", "IdentifierTypo")]
+    [Guid("c474b514-372c-44b3-aec2-b0aea87b99ea")]
+    [CSDeskBandRegistration(Name = "AutoTaskbar", ShowDeskBand = true)]
     public partial class TaskbarButtonControl : INotifyPropertyChanged
     {
-        private Orientation _taskbarOrientation;
-        private int _taskbarWidth;
-        private int _taskbarHeight;
-        private Edge _taskbarEdge;
-
-        public Orientation TaskbarOrientation
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            get => _taskbarOrientation;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private string _buttonContent;
+        public string ButtonContent
+        {
+            get => _buttonContent;
             set
             {
-                if (value == _taskbarOrientation) return;
-                _taskbarOrientation = value;
+                if (value == _buttonContent) return;
+                _buttonContent = value;
                 OnPropertyChanged();
             }
         }
 
-        public int TaskbarWidth
+        private string _buttonColor;
+        public string ButtonColor
         {
-            get => _taskbarWidth;
+            get => _buttonColor;
             set
             {
-                if (value == _taskbarWidth) return;
-                _taskbarWidth = value;
+                if (value == _buttonColor) return;
+                _buttonColor = value;
                 OnPropertyChanged();
-            }
-        }
-
-        public int TaskbarHeight
-        {
-            get => _taskbarHeight;
-            set
-            {
-                if (value == _taskbarHeight) return;
-                _taskbarHeight = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public Edge TaskbarEdge
-        {
-            get => _taskbarEdge;
-            set
-            {
-                if (value == _taskbarEdge) return;
-                _taskbarEdge = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private List<DeskBandMenuItem> ContextMenuItems
-        {
-            get
-            {
-                var action = new DeskBandMenuAction("Action - Toggle submenu");
-                var separator = new DeskBandMenuSeparator();
-                var submenuAction = new DeskBandMenuAction("Submenu Action - Toggle checkmark");
-                var submenu = new DeskBandMenu("Submenu")
-                {
-                    Items = { submenuAction }
-                };
-
-                action.Clicked += (sender, args) => submenu.Enabled = !submenu.Enabled;
-                submenuAction.Clicked += (sender, args) => submenuAction.Checked = !submenuAction.Checked;
-
-                return new List<DeskBandMenuItem>() {action, separator, submenu};
             }
         }
 
@@ -87,31 +44,38 @@ namespace TaskbarButton
         {
             InitializeComponent();
 
-            Options.MinHorizontalSize.Width = 500;
-            Options.MinVerticalSize.Width = 130;
-            Options.MinVerticalSize.Height = 200;
+            Options.MinHorizontalSize.Width = 35;
+            Options.MinHorizontalSize.Height = 25;
+            Options.MinVerticalSize.Width = 35;
+            Options.MinVerticalSize.Height = 25;
 
-            TaskbarInfo.TaskbarEdgeChanged += (sender, args) => TaskbarEdge = args.Edge;
-            TaskbarInfo.TaskbarOrientationChanged += (sender, args) => TaskbarOrientation = args.Orientation == CSDeskBand.TaskbarOrientation.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
-            TaskbarInfo.TaskbarSizeChanged += (sender, args) =>
+            if (TaskbarManager.GetTaskbarState() == TaskbarManager.AppBarStates.AlwaysOnTop)
             {
-                TaskbarWidth = args.Size.Width;
-                TaskbarHeight = args.Size.Height;
-            };
-
-            TaskbarEdge = TaskbarInfo.Edge;
-            TaskbarOrientation = TaskbarInfo.Orientation == CSDeskBand.TaskbarOrientation.Horizontal ? Orientation.Horizontal : Orientation.Vertical;
-            TaskbarWidth = TaskbarInfo.Size.Width;
-            TaskbarHeight = TaskbarInfo.Size.Height;
-
-            Options.ContextMenuItems = ContextMenuItems;
+                ButtonContent = "OFF";
+                ButtonColor = "#e84118";
+            }
+            else
+            {
+                ButtonContent = "ON";
+                ButtonColor = "#27ae60";
+            }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (TaskbarManager.GetTaskbarState() == TaskbarManager.AppBarStates.AlwaysOnTop)
+            {
+                TaskbarManager.SetTaskbarState(TaskbarManager.AppBarStates.AutoHide);
+                ButtonContent = "ON";
+                ButtonColor = "#27ae60";
+                //KeyboardManager.WindowsKeyPress();
+            }
+            else
+            {
+                TaskbarManager.SetTaskbarState(TaskbarManager.AppBarStates.AlwaysOnTop);
+                ButtonContent = "OFF";
+                ButtonColor = "#e84118";
+            }
         }
     }
 }
