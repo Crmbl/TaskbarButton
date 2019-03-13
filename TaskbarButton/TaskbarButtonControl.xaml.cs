@@ -11,7 +11,7 @@ namespace TaskbarButton
 {
     [ComVisible(true)]
     [Guid("89BF6B36-A0B0-4C95-A666-87A55C226986")]
-    [CSDeskBandRegistration(Name = "Toggle taskbar hiding mode", ShowDeskBand = true)]
+    [CSDeskBandRegistration(Name = "Auto hide taskbar", ShowDeskBand = true)]
     [SuppressMessage("ReSharper", "IdentifierTypo")]
     public partial class TaskbarButtonControl : INotifyPropertyChanged
     {
