@@ -23,6 +23,9 @@ namespace TaskbarButton
         [DllImport("gdi32.dll")]
         static extern uint GetPixel(IntPtr hdc, int nXPos, int nYPos);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
         #endregion //DLL imports
 
         #region Structs
@@ -103,6 +106,20 @@ namespace TaskbarButton
                 (int)(pixel & 0x0000FF00) >> 8,
                 (int)(pixel & 0x00FF0000) >> 16);
             return color;
+        }
+
+        /// <summary>
+        /// Sets the active window to Taskbar, then remove it
+        /// allows quick hiding in Windows 10
+        /// </summary>
+        public static void SetActiveWindowHack()
+        {
+            var hWnd = FindWindow("System_TrayWnd", null);
+            if (hWnd == IntPtr.Zero)
+                hWnd = FindWindow("Shell_TrayWnd", null);
+
+            var previoushWnd = SetActiveWindow(hWnd);
+            SetActiveWindow(previoushWnd);
         }
     }
 }

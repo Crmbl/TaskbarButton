@@ -63,6 +63,7 @@ namespace TaskbarButton
         {
             InitializeComponent();
 
+            TransparencyEnabled = false;
             Options.MinHorizontalSize.Width = 35;
             Options.MinHorizontalSize.Height = 25;
             Options.MinVerticalSize.Width = 35;
@@ -79,8 +80,8 @@ namespace TaskbarButton
                     break;
             }
 
-            var tmp = TaskbarManager.GetPixelColor(point.X, point.Y);
-            TaskbarColor = new SolidColorBrush(Color.FromArgb(tmp.A, tmp.R, tmp.G, tmp.B));
+            var pixel = TaskbarManager.GetPixelColor(point.X, point.Y);
+            TaskbarColor = new SolidColorBrush(Color.FromArgb(pixel.A, pixel.R, pixel.G, pixel.B));
             if (TaskbarManager.GetTaskbarState() == TaskbarManager.AppBarStates.AlwaysOnTop)
             {
                 ButtonContent = "OFF";
@@ -100,6 +101,7 @@ namespace TaskbarButton
                 TaskbarManager.SetTaskbarState(TaskbarManager.AppBarStates.AutoHide);
                 ButtonContent = "ON";
                 ButtonColor = OnColor;
+                TaskbarManager.SetActiveWindowHack();
             }
             else
             {
