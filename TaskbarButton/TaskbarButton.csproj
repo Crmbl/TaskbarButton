@@ -64,7 +64,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KeyboardManager.cs" />
     <Compile Include="TaskbarManager.cs" />
     <Page Include="TaskbarButtonControl.xaml">
       <Generator>MSBuild:Compile</Generator>

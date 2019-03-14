@@ -1,7 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using System.Windows.Media;
 using CSDeskBand;
+using Color = System.Windows.Media.Color;
 
 namespace TaskbarButton
 {
@@ -10,6 +14,9 @@ namespace TaskbarButton
     [CSDeskBandRegistration(Name = "AutoTaskbar", ShowDeskBand = true)]
     public partial class TaskbarButtonControl : INotifyPropertyChanged
     {
+        private const string OnColor = "#27ae60";
+        private const string OffColor = "#e84118";
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -40,6 +47,18 @@ namespace TaskbarButton
             }
         }
 
+        private SolidColorBrush _taskbarcolor;
+        public SolidColorBrush TaskbarColor
+        {
+            get => _taskbarcolor;
+            set
+            {
+                if (value == _taskbarcolor) return;
+                _taskbarcolor = value;
+                OnPropertyChanged();
+            }
+        }
+
         public TaskbarButtonControl()
         {
             InitializeComponent();
@@ -49,15 +68,28 @@ namespace TaskbarButton
             Options.MinVerticalSize.Width = 35;
             Options.MinVerticalSize.Height = 25;
 
+            var point = new Point(1, 1);
+            switch (TaskbarInfo.Edge)
+            {
+                case Edge.Bottom:
+                    point.Y = Screen.PrimaryScreen.Bounds.Height - 1;
+                    break;
+                case Edge.Right:
+                    point.X = Screen.PrimaryScreen.Bounds.Width - 1;
+                    break;
+            }
+
+            var tmp = TaskbarManager.GetPixelColor(point.X, point.Y);
+            TaskbarColor = new SolidColorBrush(Color.FromArgb(tmp.A, tmp.R, tmp.G, tmp.B));
             if (TaskbarManager.GetTaskbarState() == TaskbarManager.AppBarStates.AlwaysOnTop)
             {
                 ButtonContent = "OFF";
-                ButtonColor = "#e84118";
+                ButtonColor = OffColor;
             }
             else
             {
                 ButtonContent = "ON";
-                ButtonColor = "#27ae60";
+                ButtonColor = OnColor;
             }
         }
 
@@ -67,14 +99,13 @@ namespace TaskbarButton
             {
                 TaskbarManager.SetTaskbarState(TaskbarManager.AppBarStates.AutoHide);
                 ButtonContent = "ON";
-                ButtonColor = "#27ae60";
-                //KeyboardManager.WindowsKeyPress();
+                ButtonColor = OnColor;
             }
             else
             {
                 TaskbarManager.SetTaskbarState(TaskbarManager.AppBarStates.AlwaysOnTop);
                 ButtonContent = "OFF";
-                ButtonColor = "#e84118";
+                ButtonColor = OffColor;
             }
         }
     }
